@@ -1,4 +1,4 @@
-#Project Orion1
+# Project Orion1
 
 **WIP**
 
@@ -6,7 +6,7 @@
 
 [![image](https://user-images.githubusercontent.com/78411295/208158587-2c80e6eb-e9fd-454a-9453-fd7740c00cc6.png)](https://youtu.be/OnDusMd1J0A)
 
-##Developped as a part of my second year of master degree
+## Developped as a part of my second year of master degree
  
 **Subject** 
 
@@ -29,7 +29,8 @@ The goal of this project is to build the foundations of a third-person turn-base
 ● Health and action points must be managed.
 
 Note: it is recommended to draw inspiration from the game XCOM (or XCOM 2) and to simplify the framework.
-Objective I
+
+**Objective I**
 
 ● Construction of the rooms.
 
@@ -37,7 +38,7 @@ Objective I
 
 ● Quality of lighting and shading: the rooms must contain various sources of light.
 
-Objective II
+**Objective II**
 
 ● Construction of a team of three units.
 
@@ -49,7 +50,7 @@ Objective II
 
 ● Quality of actions: the various actions of the characters must be visible.
 
-Objective III
+**Objective III**
 
 ● Construction of the opposing team.
 

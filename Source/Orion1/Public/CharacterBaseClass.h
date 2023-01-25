@@ -37,6 +37,9 @@ public:
 	UPROPERTY(BlueprintReadWrite, Category = "Stats", meta = (ClampMin = "0", ClampMax = "1"))
 	float ArmorReducedDamage = 0.75f;
 
+	UPROPERTY(EditDefaultsOnly)
+		UDataAsset* UnitDataAsset; 
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;

@@ -2,6 +2,8 @@
 
 
 #include "BaseCharacters.h"
+#include "DataAssetForCharacters.h"
+
 
 // Sets default values
 ABaseCharacters::ABaseCharacters()

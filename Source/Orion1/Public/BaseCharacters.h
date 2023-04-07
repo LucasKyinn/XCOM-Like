@@ -84,10 +84,19 @@ public:
 
 	///				MISCELLAENEOUS				///
 	// Ally team or Ennemy (bool cause only two teams)
-	UPROPERTY(BlueprintReadWrite, BluePrintReadWrite,  Category = "Stats")
+	UPROPERTY(BlueprintReadWrite,  Category = "Stats")
 	bool Team; 
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Ghost")
+	TSubclassOf < AActor> GhostClass;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Ghost")
+	class UMaterialInstance * GhostMaterialClass;
+
+	UPROPERTY(BlueprintReadOnly , Category = "Stuff")
+	FVector VectDestination; 
+
+	void(ABaseCharacters::*ActionToExexcute)();
 
 protected:
 	// Called when the game starts or when spawned
@@ -103,4 +112,8 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+	//Actions Functions 
+	void ConfirmedExecution();
+	void CanceledExecution();
+	void MoveToVectorLocation();
 };

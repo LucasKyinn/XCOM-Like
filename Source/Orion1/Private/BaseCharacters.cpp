@@ -3,6 +3,7 @@
 
 #include "BaseCharacters.h"
 #include "DataAssetForCharacters.h"
+#include "Blueprint/AIBlueprintHelperLibrary.h"
 
 
 // Sets default values
@@ -10,6 +11,10 @@ ABaseCharacters::ABaseCharacters()
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+	bUseControllerRotationPitch = false;
+	bUseControllerRotationRoll = false;
+	bUseControllerRotationYaw = false;
+
 
 }
 
@@ -17,13 +22,20 @@ ABaseCharacters::ABaseCharacters()
 void ABaseCharacters::BeginPlay()
 {
 	Super::BeginPlay();
-	
+	VectDestination = GetTargetLocation();
 }
 
 // Called every frame
 void ABaseCharacters::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	//Not smooth but will do for now
+	FVector Velocity = GetVelocity();
+	FRotator TargetRotation = Velocity.Rotation();
+
+	SetActorRotation(TargetRotation);
+
 
 }
 
@@ -32,5 +44,23 @@ void ABaseCharacters::SetupPlayerInputComponent(UInputComponent* PlayerInputComp
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
+}
+
+void ABaseCharacters::ConfirmedExecution()
+{
+	if (ActionToExexcute) {
+		(this->*ActionToExexcute)();
+		ActionToExexcute = nullptr;
+	}
+}
+
+void ABaseCharacters::CanceledExecution()
+{
+	ActionToExexcute = nullptr;
+}
+
+void ABaseCharacters::MoveToVectorLocation()
+{
+	UAIBlueprintHelperLibrary::SimpleMoveToLocation(Controller,VectDestination);
 }
 

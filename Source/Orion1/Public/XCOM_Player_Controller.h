@@ -35,6 +35,12 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	class UInputAction* Walk;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Characters")
+	TSubclassOf <ACharacter> AllyClass;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Characters", meta = (AllowPrivateAccess = "true"))
+	TArray<ACharacter*> AllyArray; 
+
 	bool bWalkMode = false;
 
 protected: 

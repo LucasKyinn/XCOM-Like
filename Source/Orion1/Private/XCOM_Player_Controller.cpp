@@ -4,8 +4,8 @@
 #include "XCOM_Player_Controller.h"
 
 #include "BaseCharacters.h"
-#include "BaseCharacters.h"
 #include "Components/CapsuleComponent.h"
+#include "Kismet/GameplayStatics.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 
@@ -28,7 +28,15 @@ void AXCOM_Player_Controller::BeginPlay()
 	{
 		Subsystem->AddMappingContext(DefaultMappingContext, 0);
 	}
-
+	if (AllyClass) {
+		UWorld* World = GetWorld();
+		TArray<AActor*> OutActors;
+		UGameplayStatics::GetAllActorsOfClass(World, AllyClass, OutActors);
+		for (AActor* Actor : OutActors) {
+			AllyArray.Add(Cast<ACharacter>(Actor));
+		}
+		Possess(AllyArray[0]);
+	}
 }
 
 void AXCOM_Player_Controller::Tick(float DeltaTime)

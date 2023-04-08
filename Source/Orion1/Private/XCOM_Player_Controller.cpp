@@ -5,6 +5,7 @@
 
 #include "BaseCharacters.h"
 #include "BaseCharacters.h"
+#include "Components/CapsuleComponent.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 
@@ -70,27 +71,64 @@ void AXCOM_Player_Controller::OnSetDestinationTriggered()
 
 void AXCOM_Player_Controller::OnSetDestinationReleased()
 {
-	// If Walk Mode On
-	GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Red, TEXT("OnSetDestinationReleased"));
+	if (bWalkMode) {
+		GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Red, TEXT("bWalkMode"));
 
-	UWorld* World = GetWorld();
-	if (World != nullptr) {
+		UWorld* World = GetWorld();
+		if (World != nullptr) {
 
-		FHitResult Hit;
-		bool bHitSuccessful = false;
-		// If we hit a surface, cache the location
-		bHitSuccessful = GetHitResultUnderCursor(ECollisionChannel::ECC_Visibility, true, Hit);
+			FHitResult Hit;
+			bool bHitSuccessful = false;
+			// If we hit a surface, cache the location
+			bHitSuccessful = GetHitResultUnderCursor(ECollisionChannel::ECC_Visibility, true, Hit);
 
-		//Todo : Test Dist to Pawn
+			//Todo : Test Dist to Pawn
 
-		FTransform SpawnTransform = FTransform();
-		SpawnTransform.SetLocation(Hit.Location);
+			FTransform SpawnTransform = FTransform();
+			SpawnTransform.SetLocation(Hit.Location);
 
-		ABaseCharacters* ControledPawn = Cast<ABaseCharacters>(GetPawn());
-		if (ControledPawn != nullptr) {
-			ControledPawn->VectDestination = Hit.Location;
+			ABaseCharacters* ControledPawn = Cast<ABaseCharacters>(GetPawn());
+			if (ControledPawn != nullptr) {
+
+				ControledPawn->VectDestination = Hit.Location;
+
+				// Create Ghost Walking to point ?
+				if (ControledPawn->GhostClass != nullptr) {
+					GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Red, TEXT("ControledPawn->GhostClass != nullptr"));
+
+					UWorld* Worl = GetWorld();
+					FTransform GhostSpawnTransform;
+					FVector LocationWithZ = Hit.Location;
+					ACharacter* Ghost = World->SpawnActorDeferred<ACharacter>(ControledPawn->GhostClass, GhostSpawnTransform);
+
+					//SetCapsule Woks
+					UCapsuleComponent* GhostCapsule = Ghost->GetCapsuleComponent();
+					UCapsuleComponent* PawnCapsule = ControledPawn->GetCapsuleComponent();
+					GhostCapsule->SetCapsuleSize(PawnCapsule->GetScaledCapsuleRadius(), PawnCapsule->GetScaledCapsuleHalfHeight());
+
+					//SetMesh
+					USkeletalMeshComponent* GhostMesh = Ghost->GetMesh();
+					GhostMesh->SetSkeletalMeshAsset(ControledPawn->GetMesh()->GetSkeletalMeshAsset());
+					GhostMesh->SetRelativeTransform(ControledPawn->GetMesh()->GetRelativeTransform());
+
+					//Set Anim
+					GhostMesh->SetAnimClass(ControledPawn->GetMesh()->GetAnimClass());
+
+					LocationWithZ.Z += PawnCapsule->GetScaledCapsuleHalfHeight();
+					GhostSpawnTransform.SetLocation(LocationWithZ);
+					Ghost->FinishSpawning(GhostSpawnTransform);
+
+					if (ControledPawn->MovementGhost != nullptr) {
+						ControledPawn->MovementGhost->Destroy();
+						ControledPawn->MovementGhost = nullptr;
+					}
+
+					ControledPawn->MovementGhost = Ghost;
+				}
+			}
 		}
 	}
+
 
 }
 
@@ -112,12 +150,11 @@ void AXCOM_Player_Controller::WalkMode()
 {
 	GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Red, TEXT("WalkMode"));
 
-	//Focus Sur le perso
 
-	//Set Walk Mode On
+	bWalkMode = true;
+
+	//Focus Sur le perso
 
 	ABaseCharacters* ControledPawn = Cast<ABaseCharacters>(GetPawn());
 	ControledPawn->ActionToExexcute = &ABaseCharacters::MoveToVectorLocation;
-
-	//Set Walk Mode Off 
 }

@@ -88,7 +88,9 @@ public:
 	bool Team; 
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Ghost")
-	TSubclassOf < AActor> GhostClass;
+	TSubclassOf <ACharacter> GhostClass;
+
+	ACharacter* MovementGhost;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Ghost")
 	class UMaterialInstance * GhostMaterialClass;

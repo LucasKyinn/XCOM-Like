@@ -3,6 +3,7 @@
 
 #include "BaseCharacters.h"
 #include "DataAssetForCharacters.h"
+#include "XCOM_Player_Controller.h"
 #include "Blueprint/AIBlueprintHelperLibrary.h"
 
 
@@ -33,7 +34,6 @@ void ABaseCharacters::Tick(float DeltaTime)
 	//Not smooth but will do for now
 	FVector Velocity = GetVelocity();
 	FRotator TargetRotation = Velocity.Rotation();
-
 	SetActorRotation(TargetRotation);
 
 
@@ -61,6 +61,13 @@ void ABaseCharacters::CanceledExecution()
 
 void ABaseCharacters::MoveToVectorLocation()
 {
+
+	//Set Walk mode off
+	AController* PlayerController = GetController();
+	AXCOM_Player_Controller* XPlayerController = Cast<AXCOM_Player_Controller>(PlayerController);
+	if (XPlayerController) XPlayerController->bWalkMode = false;
+
 	UAIBlueprintHelperLibrary::SimpleMoveToLocation(Controller,VectDestination);
+
 }
 

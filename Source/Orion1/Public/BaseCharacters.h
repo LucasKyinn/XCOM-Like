@@ -16,32 +16,6 @@ public:
 	// Sets default values for this character's properties
 	ABaseCharacters();
 
-	///					HEALTH					///
-
-	//Max Health for the character, also starting health , Health cannot go beyond this amount
-	UPROPERTY(BlueprintReadWrite, Category = "Stats" , meta= (ClampMin = "0" , ClampMax = "200"))
-	int MaxHealth;
-
-	//Character Current Health
-	UPROPERTY(BlueprintReadWrite, Category = "Stats", meta = (ClampMin = "0", ClampMax = "200"))
-	int CurrentHealth;
-
-	///					ARMOR					///
-
-
-	//Maximum of Armor Stack you can have
-	UPROPERTY(BlueprintReadWrite, Category = "Stats", meta = (ClampMin = "1", ClampMax = "5"))
-	int MaxArmorStack;
-
-	//Current Stack of armor, cannot exede MaxArmorStack
-	UPROPERTY(BlueprintReadWrite, Category = "Stats", meta = (ClampMin = "0", ClampMax = "5"))
-	int CurrentArmorStack;
-
-	// Percentage of damage that armor can reduce
-	UPROPERTY(BlueprintReadWrite, Category = "Stats", meta = (ClampMin = "0.0", ClampMax = "0.9"))
-	float ArmorReducedDamage;
-
-
 	///					ENERGY					///
 
 	//Max Energy for the character, also starting Energy , Energy cannot go beyond this amount
@@ -83,9 +57,6 @@ public:
 	int BaseDamage;
 
 	///				MISCELLAENEOUS				///
-	// Ally team or Ennemy (bool cause only two teams)
-	UPROPERTY(BlueprintReadWrite,  Category = "Stats")
-	bool Team; 
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Ghost")
 	TSubclassOf <ACharacter> GhostClass;

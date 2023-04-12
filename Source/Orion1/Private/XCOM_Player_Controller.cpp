@@ -55,7 +55,6 @@ void AXCOM_Player_Controller::SetupInputComponent()
 	{
 		// Setup mouse input events
 		EnhancedInputComponent->BindAction(SetDestinationAction, ETriggerEvent::Started, this, &AXCOM_Player_Controller::OnInputStarted);
-		// EnhancedInputComponent->BindAction(SetDestinationAction, ETriggerEvent::Triggered, this, &AXCOM_Player_Controller::OnSetDestinationTriggered);
 		EnhancedInputComponent->BindAction(SetDestinationAction, ETriggerEvent::Completed, this, &AXCOM_Player_Controller::OnSetDestinationReleased);
 		EnhancedInputComponent->BindAction(SetDestinationAction, ETriggerEvent::Canceled, this, &AXCOM_Player_Controller::OnSetDestinationReleased);
 
@@ -63,6 +62,11 @@ void AXCOM_Player_Controller::SetupInputComponent()
 		EnhancedInputComponent->BindAction(Cancel, ETriggerEvent::Completed, this, &AXCOM_Player_Controller::CancelAction);
 		EnhancedInputComponent->BindAction(Confirm, ETriggerEvent::Completed, this, &AXCOM_Player_Controller::ConfirmAction);
 		EnhancedInputComponent->BindAction(Walk, ETriggerEvent::Completed, this, &AXCOM_Player_Controller::WalkMode);
+		EnhancedInputComponent->BindAction(Shoot, ETriggerEvent::Completed, this, &AXCOM_Player_Controller::ShootMode);
+		EnhancedInputComponent->BindAction(Next, ETriggerEvent::Completed, this, &AXCOM_Player_Controller::GoNext);
+		EnhancedInputComponent->BindAction(Previous, ETriggerEvent::Completed, this, &AXCOM_Player_Controller::GoPrevious);
+
+
 	}
 
 }
@@ -132,11 +136,11 @@ void AXCOM_Player_Controller::OnSetDestinationReleased()
 					}
 
 					ControledPawn->MovementGhost = Ghost;
+					return;
 				}
 			}
 		}
 	}
-
 
 }
 
@@ -145,6 +149,7 @@ void AXCOM_Player_Controller::CancelAction()
 	GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Red, TEXT("CancelAction"));
 	ABaseCharacters* ControledPawn = Cast<ABaseCharacters>(GetPawn());
 	ControledPawn->CanceledExecution();
+	//Cancel Modes ????
 }
 
 void AXCOM_Player_Controller::ConfirmAction()
@@ -157,7 +162,7 @@ void AXCOM_Player_Controller::ConfirmAction()
 void AXCOM_Player_Controller::WalkMode()
 {
 	GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Red, TEXT("WalkMode"));
-
+	if (bShootMode)return;
 
 	bWalkMode = true;
 
@@ -166,3 +171,45 @@ void AXCOM_Player_Controller::WalkMode()
 	ABaseCharacters* ControledPawn = Cast<ABaseCharacters>(GetPawn());
 	ControledPawn->ActionToExexcute = &ABaseCharacters::MoveToVectorLocation;
 }
+
+void AXCOM_Player_Controller::ShootMode()
+{
+	GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Red, TEXT("ShootMode"));
+	if (bWalkMode)return;
+	UWorld* World = GetWorld();
+	ABaseCharacters* ControledPawn = Cast<ABaseCharacters>(GetPawn());
+	if (World != nullptr || ControledPawn == nullptr ) {
+		bShootMode = true;
+		//Selection de target
+		TArray<AActor*> ActorInRange; 
+		UKismetSystemLibrary::SphereOverlapActors(World, ControledPawn->GetActorLocation(), ControledPawn->Range, TArray< TEnumAsByte< EObjectTypeQuery > >(), ABaseCharacters::StaticClass(), TArray< AActor* >(), ActorInRange);
+		if (ActorInRange.Num() > 0) {
+			ControledPawn->ActorInRange = ActorInRange;
+			ControledPawn->Target = ActorInRange[0]; 
+			ControledPawn->ActionToExexcute = &ABaseCharacters::PewPewExecution;
+		}
+		else {
+			bShootMode = false;
+			// Manque un truc ?
+		}
+		
+	}
+
+}
+
+void AXCOM_Player_Controller::GoNext()
+{
+	if (bShootMode) {
+		ABaseCharacters* ControledPawn = Cast<ABaseCharacters>(GetPawn());
+		ControledPawn->NextTarget();
+	}
+}
+
+void AXCOM_Player_Controller::GoPrevious()
+{
+	if (bShootMode) {
+		ABaseCharacters* ControledPawn = Cast<ABaseCharacters>(GetPawn());
+		ControledPawn->PreviousTarget();
+	}
+}
+

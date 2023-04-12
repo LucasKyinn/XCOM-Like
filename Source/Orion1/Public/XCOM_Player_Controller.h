@@ -35,6 +35,15 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	class UInputAction* Walk;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	class UInputAction* Shoot;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	class UInputAction* Next;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	class UInputAction* Previous;
+	// Other
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Characters")
 	TSubclassOf <ACharacter> AllyClass;
 
@@ -42,6 +51,8 @@ public:
 	TArray<ACharacter*> AllyArray; 
 
 	bool bWalkMode = false;
+	bool bShootMode = false;
+
 
 protected: 
 
@@ -63,5 +74,14 @@ protected:
 
 	UFUNCTION(BlueprintCallable)
 	void WalkMode();
+
+	UFUNCTION(BlueprintCallable)
+	void ShootMode();
+
+	UFUNCTION(BlueprintCallable)
+	void GoNext();
+
+	UFUNCTION(BlueprintCallable)
+	void GoPrevious();
 
 };

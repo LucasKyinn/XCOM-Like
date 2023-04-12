@@ -56,6 +56,10 @@ public:
 	UPROPERTY(BlueprintReadWrite, Category = "Stats", meta = (ClampMin = "30", ClampMax = "200"))
 	int BaseDamage;
 
+	//Weapon Range TODO ADD IT IN THE THING
+	UPROPERTY(BlueprintReadWrite, Category = "Stats", meta = (ClampMin = "30", ClampMax = "3000"))
+	float Range = 2000.f;
+
 	///				MISCELLAENEOUS				///
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Ghost")
@@ -68,6 +72,10 @@ public:
 
 	UPROPERTY(BlueprintReadOnly , Category = "Stuff")
 	FVector VectDestination; 
+
+	TArray<AActor*> ActorInRange;
+
+	AActor* Target;
 
 	void(ABaseCharacters::*ActionToExexcute)();
 
@@ -85,8 +93,15 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+	//UFUNCTION ?
+	int ChanceToHit();
+
 	//Actions Functions 
 	void ConfirmedExecution();
 	void CanceledExecution();
 	void MoveToVectorLocation();
+	void PewPewExecution();
+	void NextTarget();
+	void PreviousTarget();
+
 };

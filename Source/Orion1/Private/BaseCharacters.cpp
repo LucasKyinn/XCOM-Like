@@ -5,6 +5,7 @@
 #include "DataAssetForCharacters.h"
 #include "XCOM_Player_Controller.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "Kismet/KismetSystemLibrary.h"
 #include "DrawDebugHelpers.h"
 #include "Blueprint/AIBlueprintHelperLibrary.h"
 
@@ -56,12 +57,17 @@ int ABaseCharacters::ChanceToHit()
 	FHitResult OutHit;
 	Direction = Target->GetActorLocation() - Start;
 	NoNoiseEnd = Direction.GetSafeNormal() * Direction.Length() * 2 + Start;
+	TArray<AActor*> Ignore;
+	Ignore.Add(this);
 
 	for (int i = 0; i < 100; i++) {
 
 		Noise = UKismetMathLibrary::RandomUnitVector() * FMath::Clamp((Direction.Length() - Precision), 50, Precision); //Vraiment Claqué au sol :Smiley Face :
-		ActorLineTraceSingle(OutHit, Start, NoNoiseEnd + Noise, ECollisionChannel::ECC_GameTraceChannel1, FCollisionQueryParams()) ? Chance++ : Chance;
-		DrawDebugLine(GetWorld(), Start, NoNoiseEnd + Noise, FColor::Red, false, 5.0f);
+
+		bool Hit =UKismetSystemLibrary::LineTraceSingleByProfile(GetWorld(), Start, NoNoiseEnd + Noise, FName("None"), false,Ignore, EDrawDebugTrace::ForDuration, OutHit, true);
+		if (Hit && OutHit.GetActor()==Target) {
+			Chance++;
+		}
 	}
 	GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Red, FString::Printf(TEXT("Chance %d "),Chance));
 
@@ -101,6 +107,8 @@ void ABaseCharacters::PewPewExecution()
 
 	ChanceToHit();
 
+	//Set Target To None
+	Target = nullptr;
 
 	//Set Shoot mode off
 	AController* PlayerController = GetController();

@@ -77,6 +77,8 @@ public:
 
 	AActor* Target;
 
+	FVector WhereToShoot;
+
 	void(ABaseCharacters::*ActionToExexcute)();
 
 protected:

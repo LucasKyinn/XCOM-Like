@@ -7,7 +7,7 @@
 #include "AbilityComponent.generated.h"
 
 
-UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
+UCLASS(Blueprintable)
 class ORION1_API UAbilityComponent : public UActorComponent
 {
 	GENERATED_BODY()
@@ -21,46 +21,49 @@ protected:
 	virtual void BeginPlay() override;
 
 	///					Stats
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Stats")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DataAsset")
 	class USpellDataAsset* AbilityDataSet;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Stats")
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Stats")
 	float Damage;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Stats")
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Stats")
 	int EnergyCost;
 	
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Stats")
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Stats")
 	float Range;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Stats")
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Stats")
 	bool bCanHitSelf;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Stats")
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Stats")
 	bool bCanHitAllies;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Stats")
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Stats")
 	bool bCanHitEnnemies;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Stats")
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Stats")
 	FString AbilityDescription;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Stats")
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Stats")
 	FString AbilityName;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Variables")
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Variables")
 	UParticleSystem* AbilityEffect; //Animation du sort
 
-	UPROPERTY(EditDefaultsOnly, Category = "Variables")
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Variables")
 	class USoundCue* AbilitySound;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Weapon")
+	TSubclassOf<UDamageType> DamageType;
 
 	///					Other
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Stats")
 	class ABaseCharacters* Target;
 
-
-
 public:	
+
+	ABaseCharacters* Owner;
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 	
@@ -68,5 +71,7 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	virtual void UseAbility();
+
+	virtual void PlayAbilityEffect(FVector TargetSpawn );
 
 };

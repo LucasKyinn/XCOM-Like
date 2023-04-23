@@ -7,8 +7,12 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "DrawDebugHelpers.h"
+#include "AbilityShoot.h"
+#include "ShootComponent.h"
+
 #include "Blueprint/AIBlueprintHelperLibrary.h"
 
+//FName ABaseCharacters::ShootComponentClassName(TEXT("BP_AbilityShoot"));
 
 // Sets default values
 ABaseCharacters::ABaseCharacters()
@@ -19,7 +23,6 @@ ABaseCharacters::ABaseCharacters()
 	bUseControllerRotationRoll = false;
 	bUseControllerRotationYaw = false;
 
-
 }
 
 // Called when the game starts or when spawned
@@ -27,6 +30,7 @@ void ABaseCharacters::BeginPlay()
 {
 	Super::BeginPlay();
 	VectDestination = GetTargetLocation();
+
 }
 
 // Called every frame
@@ -62,14 +66,15 @@ int ABaseCharacters::ChanceToHit()
 
 	for (int i = 0; i < 100; i++) {
 
+		//FMAth::RandCon a la place
 		Noise = UKismetMathLibrary::RandomUnitVector() * FMath::Clamp((Direction.Length() - Precision), 50, Precision); //Vraiment Claqué au sol :Smiley Face :
 
-		bool Hit =UKismetSystemLibrary::LineTraceSingleByProfile(GetWorld(), Start, NoNoiseEnd + Noise, FName("None"), false,Ignore, EDrawDebugTrace::ForDuration, OutHit, true);
+		bool Hit =UKismetSystemLibrary::LineTraceSingleByProfile(GetWorld(), Start, NoNoiseEnd + Noise, FName("None"), false,Ignore, EDrawDebugTrace::None, OutHit, true);
 		if (Hit && OutHit.GetActor()==Target) {
 			Chance++;
 		}
 	}
-	GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Red, FString::Printf(TEXT("Chance %d "),Chance));
+	//GEngine->AddOnScreenDebugMessage(2, 10.f, FColor::Red, FString::Printf(TEXT("Chance %d "),Chance));
 
 	return Chance;
 }
@@ -101,11 +106,8 @@ void ABaseCharacters::MoveToVectorLocation()
 
 void ABaseCharacters::PewPewExecution()
 {
-	//TODO SHOOT ON THE ENEMIES PEWPEWPEW RATATATATTAATATTAATATAT
-	GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Red, TEXT("RATATATATTAATATTAATATAT"));
-
-
 	ChanceToHit();
+	ShootComponenttest->UseAbility();
 
 	//Set Target To None
 	Target = nullptr;

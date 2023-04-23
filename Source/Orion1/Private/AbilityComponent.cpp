@@ -4,7 +4,16 @@
 #include "AbilityComponent.h"
 #include "BaseCharacters.h"
 #include "HealthComponent.h"
+#include "Particles/ParticleSystemComponent.h"
+#include "Particles/ParticleSystem.h"
+#include "Components/SkeletalMeshComponent.h"
+#include "Components/PawnNoiseEmitterComponent.h"
+#include "Kismet/GameplayStatics.h"
+#include "Kismet/KismetMathLibrary.h"
+#include "Particles/ParticleSystemComponent.h"
+#include "SpellDataAsset.h"
 #include "Sound/SoundCue.h"
+
 
 // Sets default values for this component's properties
 UAbilityComponent::UAbilityComponent()
@@ -12,6 +21,7 @@ UAbilityComponent::UAbilityComponent()
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = true;
+	Owner = Cast<ABaseCharacters>(GetOwner());
 
 	// ...
 }
@@ -23,7 +33,6 @@ void UAbilityComponent::BeginPlay()
 	Super::BeginPlay();
 
 	// ...
-	
 }
 
 
@@ -47,5 +56,10 @@ bool UAbilityComponent::IsTargetValid()
 void UAbilityComponent::UseAbility()
 {
 	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, TEXT("Ability"));
+}
+
+void UAbilityComponent::PlayAbilityEffect(FVector TargetSpawn)
+{
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, TEXT("PlayAbilityEffect"));
 }
 

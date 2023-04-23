@@ -84,7 +84,7 @@ void AXCOM_Player_Controller::OnSetDestinationTriggered()
 void AXCOM_Player_Controller::OnSetDestinationReleased()
 {
 	if (bWalkMode) {
-		GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Red, TEXT("bWalkMode"));
+		GEngine->AddOnScreenDebugMessage(5, 10.f, FColor::Red, TEXT("bWalkMode"));
 
 		UWorld* World = GetWorld();
 		if (World != nullptr) {
@@ -146,27 +146,26 @@ void AXCOM_Player_Controller::OnSetDestinationReleased()
 
 void AXCOM_Player_Controller::CancelAction()
 {
-	GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Red, TEXT("CancelAction"));
+	GEngine->AddOnScreenDebugMessage(5, 10.f, FColor::Red, TEXT("CancelAction"));
 	ABaseCharacters* ControledPawn = Cast<ABaseCharacters>(GetPawn());
 	ControledPawn->CanceledExecution();
-	//Cancel Modes ????
+	bWalkMode = false;
+	bShootMode = false;
 }
 
 void AXCOM_Player_Controller::ConfirmAction()
 {
-	GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Red, TEXT("ConfirmAction"));
+	GEngine->AddOnScreenDebugMessage(5, 10.f, FColor::Red, TEXT("ConfirmAction"));
 	ABaseCharacters* ControledPawn = Cast<ABaseCharacters>(GetPawn());
 	ControledPawn->ConfirmedExecution();
 }
 
 void AXCOM_Player_Controller::WalkMode()
 {
-	GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Red, TEXT("WalkMode"));
+	GEngine->AddOnScreenDebugMessage(5, 10.f, FColor::Red, TEXT("WalkMode"));
 	if (bShootMode)return;
 
 	bWalkMode = true;
-
-	//Focus Sur le perso
 
 	ABaseCharacters* ControledPawn = Cast<ABaseCharacters>(GetPawn());
 	ControledPawn->ActionToExexcute = &ABaseCharacters::MoveToVectorLocation;
@@ -174,7 +173,7 @@ void AXCOM_Player_Controller::WalkMode()
 
 void AXCOM_Player_Controller::ShootMode()
 {
-	GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Red, TEXT("ShootMode"));
+	GEngine->AddOnScreenDebugMessage(5, 10.f, FColor::Red, TEXT("ShootMode"));
 	if (bWalkMode)return;
 	UWorld* World = GetWorld();
 	ABaseCharacters* ControledPawn = Cast<ABaseCharacters>(GetPawn());

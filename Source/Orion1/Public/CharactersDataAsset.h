@@ -5,8 +5,7 @@
 #include "CoreMinimal.h"
 #include "Engine/DataAsset.h"
 #include "GameplayTagContainer.h"
-
-
+#include "SpellDataAsset.h"
 #include "CharactersDataAsset.generated.h"
 
 /**
@@ -40,5 +39,6 @@ public:
 	UPROPERTY(BlueprintReadWrite, Category = "Stats", meta = (ClampMin = "0", ClampMax = "1"))
 		float ArmorReducedDamage = 0.75f;
 
-	
+	UPROPERTY(BlueprintReadWrite, Category = "Skills")
+	USpellDataAsset* ShootDataAsset; 
 };

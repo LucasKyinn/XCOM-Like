@@ -81,6 +81,16 @@ public:
 
 	void(ABaseCharacters::*ActionToExexcute)();
 
+	static FName ShootComponentClassName;
+
+
+	UPROPERTY(Category = Character, VisibleAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class UAbilityShoot> ShootComponenttest;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TSubclassOf<class UAbilityShoot> ShootBPClass ;
+
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;

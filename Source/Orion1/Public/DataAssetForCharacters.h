@@ -6,6 +6,7 @@
 #include "CoreMinimal.h"
 #include "Engine/DataAsset.h"
 #include "GameplayTagContainer.h"
+#include "SpellDataAsset.h"
 
 #include "DataAssetForCharacters.generated.h"
 
@@ -63,4 +64,6 @@ public:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 		bool Team=0;
 
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Skills")
+	USpellDataAsset* ShootDataAsset;
 };

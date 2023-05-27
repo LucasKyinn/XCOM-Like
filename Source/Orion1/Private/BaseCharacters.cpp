@@ -5,11 +5,13 @@
 #include "DataAssetForCharacters.h"
 #include "XCOM_Player_Controller.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "DrawDebugHelpers.h"
 #include "AbilityShoot.h"
 #include "ShootComponent.h"
-
+#include "HealthComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "Blueprint/AIBlueprintHelperLibrary.h"
 
 //FName ABaseCharacters::ShootComponentClassName(TEXT("BP_AbilityShoot"));
@@ -19,9 +21,11 @@ ABaseCharacters::ABaseCharacters()
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+
 	bUseControllerRotationPitch = false;
 	bUseControllerRotationRoll = false;
 	bUseControllerRotationYaw = false;
+
 
 }
 
@@ -29,7 +33,7 @@ ABaseCharacters::ABaseCharacters()
 void ABaseCharacters::BeginPlay()
 {
 	Super::BeginPlay();
-	VectDestination = GetTargetLocation();
+	HealthComponent = FindComponentByClass<UHealthComponent>();
 
 }
 
@@ -38,12 +42,31 @@ void ABaseCharacters::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	//Not smooth but will do for now
-	FVector Velocity = GetVelocity();
-	FRotator TargetRotation = Velocity.Rotation();
-	SetActorRotation(TargetRotation);
+	FVector Direction;
+	FRotator TargetRotation;
+	FRotator CurrentRotation;
+	FRotator NewRotation;
 
+	if (!GetVelocity().IsNearlyZero(0.1)) {
 
+		Direction = (GetActorLocation() + GetVelocity()) - GetActorLocation();
+		Direction.Z = 0; // To prevent unwanted pitch rotation
+		Direction.Normalize();
+		TargetRotation = FRotationMatrix::MakeFromX(Direction).Rotator();
+		CurrentRotation = GetActorRotation();
+		NewRotation = FMath::RInterpConstantTo(CurrentRotation, TargetRotation, GetWorld()->GetDeltaSeconds(), 200.f);
+		SetActorRotation(NewRotation);
+	}
+	else if (Target != nullptr) {
+
+		Direction = Target->GetActorLocation() - GetActorLocation();
+		Direction.Z = 0; // To prevent unwanted pitch rotation
+		Direction.Normalize();
+		TargetRotation = FRotationMatrix::MakeFromX(Direction).Rotator();
+		CurrentRotation = GetActorRotation();
+		NewRotation = FMath::RInterpConstantTo(CurrentRotation, TargetRotation, GetWorld()->GetDeltaSeconds(), 200.f);
+		SetActorRotation(NewRotation);
+	}
 }
 
 // Called to bind functionality to input
@@ -79,6 +102,26 @@ int ABaseCharacters::ChanceToHit()
 	return Chance;
 }
 
+float ABaseCharacters::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+{
+	if (HealthComponent != nullptr) {
+		HealthComponent->HandleTakeAnyDamage(this, DamageAmount, nullptr, DamageCauser->GetInstigatorController(), DamageCauser);
+		if (HealthComponent->bIsDead) {
+			GetMesh()->SetSimulatePhysics(true);
+
+			UPawnMovementComponent* MovementComp = GetMovementComponent();
+			if (MovementComp) {
+				MovementComp->Deactivate();
+				// Define a timer handle
+				FTimerHandle TimerHandle;
+				GetWorld()->GetTimerManager().SetTimer(TimerHandle, [this](){this->Destroy();}, 3.0f, false);
+			}
+		}
+	}
+
+	return 0.0f;
+}
+
 void ABaseCharacters::ConfirmedExecution()
 {
 	if (ActionToExexcute) {
@@ -107,7 +150,13 @@ void ABaseCharacters::MoveToVectorLocation()
 void ABaseCharacters::PewPewExecution()
 {
 	ChanceToHit();
+	if(Cast<ABaseCharacters>(Target)->bIsAlly != bIsAlly )
 	ShootComponenttest->UseAbility();
+
+	else {
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Cant Shoot All"));
+	}
+	//Retirer point d action or we 
 
 	//Set Target To None
 	Target = nullptr;
@@ -136,8 +185,6 @@ void ABaseCharacters::PreviousTarget()
 	if (place == 0) Target = ActorInRange[(ActorInRange.Num()-1)]; 
 	else Target = ActorInRange[(place-1)];
 	GEngine->AddOnScreenDebugMessage(-1, 10, FColor::Green, Target->GetActorLabel());
-
-	//Focus sur Target ? probablment plus facile en BP
 
 }
 

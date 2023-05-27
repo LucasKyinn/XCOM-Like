@@ -6,6 +6,8 @@
 #include "GameFramework/Character.h"
 #include "BaseCharacters.generated.h"
 
+class UHealthComponent;
+
 //Base class for all characters in the game, allies and ennemies
 UCLASS()
 class ORION1_API ABaseCharacters : public ACharacter
@@ -62,6 +64,9 @@ public:
 
 	///				MISCELLAENEOUS				///
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stats")
+	bool bIsAlly;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Ghost")
 	TSubclassOf <ACharacter> GhostClass;
 
@@ -75,6 +80,7 @@ public:
 
 	TArray<AActor*> ActorInRange;
 
+	UPROPERTY(BlueprintReadOnly, Category = "Target")
 	AActor* Target;
 
 	FVector WhereToShoot;
@@ -90,6 +96,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TSubclassOf<class UAbilityShoot> ShootBPClass ;
 
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	class UHealthComponent* HealthComponent;
 
 protected:
 	// Called when the game starts or when spawned
@@ -108,6 +117,8 @@ public:
 	//UFUNCTION ?
 	int ChanceToHit();
 
+
+	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
 	//Actions Functions 
 	void ConfirmedExecution();
 	void CanceledExecution();

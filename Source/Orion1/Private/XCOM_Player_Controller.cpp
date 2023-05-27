@@ -2,7 +2,7 @@
 
 
 #include "XCOM_Player_Controller.h"
-
+#include "Kismet/KismetMathLibrary.h"
 #include "BaseCharacters.h"
 #include "Components/CapsuleComponent.h"
 #include "Kismet/GameplayStatics.h"
@@ -181,7 +181,9 @@ void AXCOM_Player_Controller::ShootMode()
 		bShootMode = true;
 		//Selection de target
 		TArray<AActor*> ActorInRange; 
-		UKismetSystemLibrary::SphereOverlapActors(World, ControledPawn->GetActorLocation(), ControledPawn->Range, TArray< TEnumAsByte< EObjectTypeQuery > >(), ABaseCharacters::StaticClass(), TArray< AActor* >(), ActorInRange);
+		TArray< AActor* >ActorToIgnore = TArray< AActor* >();
+		ActorToIgnore.Add(Cast<AActor>(ControledPawn));
+		UKismetSystemLibrary::SphereOverlapActors(World, ControledPawn->GetActorLocation(), ControledPawn->Range, TArray< TEnumAsByte< EObjectTypeQuery > >(), ABaseCharacters::StaticClass(), ActorToIgnore, ActorInRange);
 		if (ActorInRange.Num() > 0) {
 			ControledPawn->ActorInRange = ActorInRange;
 			ControledPawn->Target = ActorInRange[0]; 

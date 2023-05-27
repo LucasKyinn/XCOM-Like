@@ -13,6 +13,9 @@ UHealthComponent::UHealthComponent()
 	PrimaryComponentTick.bCanEverTick = true;
 
 	// ...
+	bIsAlly = false;
+	CurrentHealth = 100;
+	MaxHealth = 100;
 }
 
 
@@ -67,7 +70,7 @@ void UHealthComponent::HandleTakeAnyDamage(AActor* DamagedActor, float Damage, c
 	}
 	CurrentHealth = FMath::Clamp(CurrentHealth - DamageTaken, 0.f, MaxHealth);
 	
-	bIsDead = CurrentHealth <= 0.f;
+	bIsDead = (CurrentHealth <= 0.f);
 
 }
 

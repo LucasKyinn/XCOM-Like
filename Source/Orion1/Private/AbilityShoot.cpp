@@ -40,7 +40,7 @@ void UAbilityShoot::UseAbility()
 
 	//Retirer des PV 
 	if (Hit) {
-		UGameplayStatics::ApplyPointDamage(HitActor, Owner->BaseDamage, ShotDirection, OutHit, Owner->GetInstigatorController(), Owner, DamageType); //Does it work ???
+		UGameplayStatics::ApplyPointDamage(HitActor, Owner->BaseDamage, ShotDirection, OutHit, Owner->GetInstigatorController(), Owner, DamageType);
 	}
 
 	// Jouer effet du tir 

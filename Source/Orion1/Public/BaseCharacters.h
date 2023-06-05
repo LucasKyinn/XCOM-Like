@@ -126,5 +126,6 @@ public:
 	void PewPewExecution();
 	void NextTarget();
 	void PreviousTarget();
+	bool IsAlive();
 
 };

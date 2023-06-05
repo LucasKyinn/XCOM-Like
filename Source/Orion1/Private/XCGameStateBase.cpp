@@ -6,6 +6,13 @@
 #include "GameFramework/PlayerController.h"
 #include "Kismet/GameplayStatics.h"
 
+void AXCGameStateBase::BeginPlay()
+{
+	Super::BeginPlay();
+	CharArray = FillCharArray();
+	SetupTurn();
+
+}
 
 TArray<ABaseCharacters*> AXCGameStateBase::FillCharArray()
 {
@@ -13,13 +20,13 @@ TArray<ABaseCharacters*> AXCGameStateBase::FillCharArray()
 
 	TArray<AActor*> FoundActors;
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ABaseCharacters::StaticClass(), FoundActors);
-
 	for (AActor* A : FoundActors) {
 		ABaseCharacters* Char = Cast<ABaseCharacters>(A);
 		if (Char && Char->IsAlive()) ResultArray.Push(Char); // TODO also check if aggro ;
 	}
-
 	ResultArray.Sort([](const ABaseCharacters& A, const ABaseCharacters& B) { return A.Speed < B.Speed; });
+
+	if (ResultArray.Num() <= 0)  GameOverFunction();
 	return ResultArray;
 }
 
@@ -33,30 +40,57 @@ bool AXCGameStateBase::EndOfTurn()
 	return bAnyAllyAlive;
 }
 
-void AXCGameStateBase::HandleTurn()
+void AXCGameStateBase::SetupTurn()
 {
+	IndexPlayingUnit = -1;
 	for (ABaseCharacters* C : CharArray) {
-		PlayingUnit = C;
-		
-		if (!PlayingUnit->IsAlive()) continue; 
-
-		if (C->bIsAlly) { //Doner le controle du perso au joueur 
-			GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Red, TEXT("Player Turn"));
-
-			APlayerController* PlayerController = GetWorld()->GetFirstPlayerController(); //single player only one ;
-
-			if(PlayerController != nullptr ) PlayerController->Possess(C);
-		}
-		else {
-			GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Red, TEXT("AI Turn"));
-
-		}
-
+		IndexPlayingUnit++;
+		if( HandleUnitPossess(C)) return;
 	}
 }
 
 void AXCGameStateBase::NextChar()
 {
-	GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Red, TEXT("SwapCharPls"));
+	IndexPlayingUnit++;
+	if (IndexPlayingUnit >= CharArray.Num()) { //Enveryone played
+		if (EndOfTurn()) {
+			CharArray = FillCharArray();
+			SetupTurn();
+		}
+		else {
+			GameOverFunction();
+		}
+	}
 
+	HandleUnitPossess(CharArray[IndexPlayingUnit]);
+}
+
+
+
+
+void AXCGameStateBase::GameOverFunction()
+{
+	GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Red, TEXT("Game Is Done"));
+	UKismetSystemLibrary::QuitGame(GetWorld(), GetWorld()->GetFirstPlayerController(), EQuitPreference::Quit , false);
+}
+
+bool AXCGameStateBase::HandleUnitPossess(ABaseCharacters* C)
+{
+	if (!C->IsAlive()) return false ;
+
+	if (C->bIsAlly) {
+		APlayerController* PlayerController = GetWorld()->GetFirstPlayerController(); //single player only one ;
+
+		if (PlayerController != nullptr)
+		{
+			PlayerController->Possess(C);
+			return true;
+		}
+		else return false;
+	}
+	else {
+		GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Red, TEXT("AI Turn")); //Temporary while AI doesn't exist
+		NextChar();
+		return true;
+	}
 }

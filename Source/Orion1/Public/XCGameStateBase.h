@@ -23,7 +23,7 @@ private:
 	int NbTurn = 0 ;
 	TArray<class ABaseCharacters*> CharArray;
 	class ABaseCharacters* PlayingUnit;
-
+	int IndexPlayingUnit=0;
 
 public:
 	bool bAnyAllyAlive = true ;
@@ -31,7 +31,11 @@ public:
 
 	bool EndOfTurn();
 
-	void HandleTurn();
+	void SetupTurn();
+
+	void GameOverFunction();
+
+	bool HandleUnitPossess(class ABaseCharacters* C);
 
 	UFUNCTION(BlueprintCallable)
 	void NextChar();
@@ -45,4 +49,8 @@ public:
 
 	UPROPERTY(BlueprintReadWrite, Category = "Turn Based")
 	EGamePhase CurrentGamePhase; //TODO Use it 
+
+protected:
+	// Called when the game starts or when spawned
+	virtual void BeginPlay() override;
 };

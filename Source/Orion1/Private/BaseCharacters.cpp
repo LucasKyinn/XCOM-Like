@@ -190,7 +190,7 @@ void ABaseCharacters::PreviousTarget()
 
 bool ABaseCharacters::IsAlive()
 {
-	if(HealthComponent != nullptr) return HealthComponent->bIsDead;
+	if(HealthComponent != nullptr) return !HealthComponent->bIsDead;
 	return false;
 }
 

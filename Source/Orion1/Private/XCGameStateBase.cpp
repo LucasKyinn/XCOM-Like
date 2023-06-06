@@ -4,6 +4,8 @@
 #include "XCGameStateBase.h"
 #include "BaseCharacters.h"
 #include "GameFramework/PlayerController.h"
+#include "AIController.h"
+#include "BehaviorTree/BlackboardComponent.h"
 #include "Kismet/GameplayStatics.h"
 
 void AXCGameStateBase::BeginPlay()
@@ -89,8 +91,17 @@ bool AXCGameStateBase::HandleUnitPossess(ABaseCharacters* C)
 		else return false;
 	}
 	else {
-		GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Red, TEXT("AI Turn")); //Temporary while AI doesn't exist
-		NextChar();
+
+		UBlackboardComponent* BBComp = Cast<AAIController>(C->GetController())->GetBlackboardComponent();
+		if (BBComp) {
+			BBComp->SetValueAsBool(FName("AIsTurn"), true);
+		}
+		else {
+
+			GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Red, TEXT("AI Turn")); //Temporary while AI doesn't exist
+			NextChar();
+		}
+		
 		return true;
 	}
 }

@@ -25,12 +25,19 @@ class ORION1_API AXCGameStateBase : public AGameStateBase
 	GENERATED_BODY()
 
 private:
-	int NbTurn = 0 ;
-	TArray<class ABaseCharacters*> CharArray;
 	class ABaseCharacters* PlayingUnit;
-	int IndexPlayingUnit=0;
 
 public:
+
+	UPROPERTY(BlueprintReadOnly)
+	int IndexPlayingUnit = 0;
+
+	UPROPERTY(BlueprintReadWrite)
+	TArray<class ABaseCharacters*> CharArray;
+
+	UPROPERTY(BlueprintReadWrite)
+	int NbTurn = 0;
+
 	bool bAnyAllyAlive = true ;
 	TArray<class ABaseCharacters*> FillCharArray();
 

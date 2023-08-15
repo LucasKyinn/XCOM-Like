@@ -150,7 +150,7 @@ void ABaseCharacters::MoveToVectorLocation()
 {
 	AController* PlayerController = GetController();
 	AXCOM_Player_Controller* XPlayerController = Cast<AXCOM_Player_Controller>(PlayerController);
-	if (XPlayerController) XPlayerController->bWalkMode = false;
+	if (XPlayerController) XPlayerController->SetWalkMode(false);
 
 	UAIBlueprintHelperLibrary::SimpleMoveToLocation(Controller,VectDestination);
 
@@ -171,7 +171,8 @@ void ABaseCharacters::PewPewExecution()
 	//Set Shoot mode off
 	AController* PlayerController = GetController();
 	AXCOM_Player_Controller* XPlayerController = Cast<AXCOM_Player_Controller>(PlayerController);
-	if (XPlayerController) XPlayerController->bShootMode = false;
+	if (XPlayerController) 
+		XPlayerController->SetShootMode(false);
 }
 
 void ABaseCharacters::NextTarget()

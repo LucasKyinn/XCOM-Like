@@ -6,6 +6,9 @@
 #include "GameFramework/PlayerController.h"
 #include "XCOM_Player_Controller.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnShootModeChanged, bool, bIsShootModeOn);
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnWalkModeChanged, bool, bIsWalkModeOn);
 
 /**
  * 
@@ -59,8 +62,22 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category = "Characters", meta = (AllowPrivateAccess = "true"))
 	TArray<ACharacter*> AllyArray; 
 
-	bool bWalkMode = false;
-	bool bShootMode = false;
+	UPROPERTY(BlueprintAssignable, Category = "Events")
+	FOnShootModeChanged ShootModeChanged;
+
+	UPROPERTY(BlueprintAssignable, Category = "Events")
+	FOnWalkModeChanged WalkModeChanged;
+
+	UFUNCTION(BlueprintCallable)
+	void SetShootMode(bool b);
+
+	bool GetShootMode() { return bShootMode; };
+
+
+	UFUNCTION(BlueprintCallable)
+	void SetWalkMode(bool b);
+
+	bool GetWalkMode() { return bWalkMode; };
 
 protected: 
 
@@ -98,4 +115,8 @@ protected:
 
 	UFUNCTION(BlueprintCallable)
 	void EndCharTurn();
+	
+	bool bShootMode = false;
+
+	bool bWalkMode = false;
 };

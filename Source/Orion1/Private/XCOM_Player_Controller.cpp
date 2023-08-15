@@ -20,6 +20,19 @@ AXCOM_Player_Controller::AXCOM_Player_Controller()
 
 }
 
+void AXCOM_Player_Controller::SetShootMode(bool b)
+{
+	bShootMode = b;
+	ShootModeChanged.Broadcast(bShootMode);
+}
+
+void AXCOM_Player_Controller::SetWalkMode(bool b)
+{
+	bWalkMode = b;
+
+	WalkModeChanged.Broadcast(bWalkMode);
+}
+
 void AXCOM_Player_Controller::BeginPlay()
 {
 	Super::BeginPlay();
@@ -85,7 +98,7 @@ void AXCOM_Player_Controller::OnSetDestinationTriggered()
 
 void AXCOM_Player_Controller::OnSetDestinationReleased()
 {
-	if (bWalkMode) {
+	if (GetWalkMode()) {
 		UWorld* World = GetWorld();
 		if (World != nullptr) {
 
@@ -145,8 +158,8 @@ void AXCOM_Player_Controller::CancelAction()
 {
 	ABaseCharacters* ControledPawn = Cast<ABaseCharacters>(GetPawn());
 	ControledPawn->CanceledExecution();
-	bWalkMode = false;
-	bShootMode = false;
+	SetWalkMode(false);
+	SetShootMode(false);
 }
 
 void AXCOM_Player_Controller::ConfirmAction()
@@ -157,9 +170,9 @@ void AXCOM_Player_Controller::ConfirmAction()
 
 void AXCOM_Player_Controller::WalkMode()
 {
-	if (bShootMode)return;
+	if (GetShootMode())return;
 
-	bWalkMode = true;
+	SetWalkMode(true);
 
 	ABaseCharacters* ControledPawn = Cast<ABaseCharacters>(GetPawn());
 	ControledPawn->ActionToExexcute = &ABaseCharacters::MoveToVectorLocation;
@@ -167,11 +180,11 @@ void AXCOM_Player_Controller::WalkMode()
 
 void AXCOM_Player_Controller::ShootMode()
 {
-	if (bWalkMode)return;
+	if (GetWalkMode()) return;
 	UWorld* World = GetWorld();
 	ABaseCharacters* ControledPawn = Cast<ABaseCharacters>(GetPawn());
 	if (World != nullptr || ControledPawn == nullptr ) {
-		bShootMode = true;
+		SetShootMode(true);
 		//Selection de target
 		TArray<AActor*> ActorInRange; 
 		TArray< AActor* >ActorToIgnore = TArray< AActor* >();
@@ -199,7 +212,7 @@ void AXCOM_Player_Controller::ShootMode()
 
 void AXCOM_Player_Controller::GoNext()
 {
-	if (bShootMode) {
+	if (GetShootMode()) {
 		ABaseCharacters* ControledPawn = Cast<ABaseCharacters>(GetPawn());
 		ControledPawn->NextTarget();
 	}
@@ -207,7 +220,7 @@ void AXCOM_Player_Controller::GoNext()
 
 void AXCOM_Player_Controller::GoPrevious()
 {
-	if (bShootMode) {
+	if (GetShootMode()) {
 		ABaseCharacters* ControledPawn = Cast<ABaseCharacters>(GetPawn());
 		ControledPawn->PreviousTarget();
 	}
@@ -215,7 +228,7 @@ void AXCOM_Player_Controller::GoPrevious()
 
 void AXCOM_Player_Controller::EndCharTurn()
 {	
-	if (bShootMode || bWalkMode) return;
+	if (GetShootMode() || GetWalkMode()) return;
 
 	AGameModeBase* GameMode = GetWorld()->GetAuthGameMode<AGameModeBase>();
 

@@ -10,7 +10,6 @@ class UHealthComponent;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnTargetChanged, AActor*, Target);
 
-
 //Base class for all characters in the game, allies and ennemies
 UCLASS()
 class ORION1_API ABaseCharacters : public ACharacter
@@ -104,6 +103,8 @@ public:
 
 	UPROPERTY(BlueprintAssignable, Category = "Events")
 	FOnTargetChanged TargetChanged;
+
+
 
 	void SetTarget(AActor* NewTarget);
 

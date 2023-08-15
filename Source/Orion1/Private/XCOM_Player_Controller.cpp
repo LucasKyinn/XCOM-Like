@@ -42,15 +42,15 @@ void AXCOM_Player_Controller::BeginPlay()
 	{
 		Subsystem->AddMappingContext(DefaultMappingContext, 0);
 	}
-	if (AllyClass) {
-		UWorld* World = GetWorld();
-		TArray<AActor*> OutActors;
-		UGameplayStatics::GetAllActorsOfClass(World, AllyClass, OutActors);
-		for (AActor* Actor : OutActors) {
-			AllyArray.Add(Cast<ACharacter>(Actor));
-		}
-		Possess(AllyArray[0]);
-	}
+	//if (AllyClass) {
+	//	UWorld* World = GetWorld();
+	//	TArray<AActor*> OutActors;
+	//	UGameplayStatics::GetAllActorsOfClass(World, AllyClass, OutActors);
+	//	for (AActor* Actor : OutActors) {
+	//		AllyArray.Add(Cast<ACharacter>(Actor));
+	//	}
+	//	Possess(AllyArray[0]);
+	//}
 }
 
 void AXCOM_Player_Controller::Tick(float DeltaTime)
@@ -107,20 +107,32 @@ void AXCOM_Player_Controller::OnSetDestinationReleased()
 			// If we hit a surface, cache the location
 			bHitSuccessful = GetHitResultUnderCursor(ECollisionChannel::ECC_Visibility, true, Hit);
 
-			//Todo : Test Dist to Pawn
-
 			FTransform SpawnTransform = FTransform();
 			SpawnTransform.SetLocation(Hit.Location);
 
 			ABaseCharacters* ControledPawn = Cast<ABaseCharacters>(GetPawn());
 			if (ControledPawn != nullptr) {
 
-				ControledPawn->VectDestination = Hit.Location;
+				FVector Destination = Hit.Location;
+
+				// Test Dist to Pawn
+				float Distance = FVector::Dist(ControledPawn->GetActorLocation(), Destination);
+				if (Distance > ControledPawn->MaxWalkableDistance)
+				{
+					// Calculate the direction from the character to the Destination
+					FVector Direction = (Destination - ControledPawn->GetActorLocation()).GetSafeNormal();
+
+					// Move the Destination closer to the character
+					Destination = ControledPawn->GetActorLocation() + Direction * ControledPawn->MaxWalkableDistance;
+				}
+
+
+				ControledPawn->VectDestination = Destination;
 
 				if (ControledPawn->GhostClass != nullptr) {
 					UWorld* Worl = GetWorld();
 					FTransform GhostSpawnTransform;
-					FVector LocationWithZ = Hit.Location;
+					FVector LocationWithZ = Destination;
 					ACharacter* Ghost = World->SpawnActorDeferred<ACharacter>(ControledPawn->GhostClass, GhostSpawnTransform);
 
 					//SetCapsule Woks

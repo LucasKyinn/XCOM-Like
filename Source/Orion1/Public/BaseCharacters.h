@@ -119,6 +119,8 @@ protected:
 	UPROPERTY(BlueprintReadOnly, Category = "Target")
 	AActor* Target;
 
+	UFUNCTION()
+	void TurnStart(ABaseCharacters* CharPlaying);
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;

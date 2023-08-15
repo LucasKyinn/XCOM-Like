@@ -13,6 +13,8 @@
 #include "HealthComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Blueprint/AIBlueprintHelperLibrary.h"
+#include "XCGameStateBase.h"
+
 
 //FName ABaseCharacters::ShootComponentClassName(TEXT("BP_AbilityShoot"));
 
@@ -41,6 +43,19 @@ void ABaseCharacters::BeginPlay()
 	Super::BeginPlay();
 	HealthComponent = FindComponentByClass<UHealthComponent>();
 
+	AXCGameStateBase* GameState = GetWorld()->GetGameState<AXCGameStateBase>();
+	if (GameState) {
+		GameState->OnUnitTurnStart.AddDynamic(this, &ABaseCharacters::TurnStart);
+	}
+
+}
+
+void ABaseCharacters::TurnStart(ABaseCharacters* CharPlaying)
+{
+	if (CharPlaying == this) {
+		CurrentEnergy += RegendEnergy;
+		if ( CurrentEnergy > MaxEnergy ) CurrentEnergy = MaxEnergy ;
+	}
 }
 
 // Called every frame
@@ -95,7 +110,7 @@ int ABaseCharacters::ChanceToHit()
 
 	for (int i = 0; i < 100; i++) {
 
-		//FMAth::RandCon a la place
+		//FMAth::RandCon a la place .
 		Noise = UKismetMathLibrary::RandomUnitVector() * FMath::Clamp((Direction.Length() - Precision), 50, Precision); //Vraiment Claqué au sol :Smiley Face :
 
 		bool Hit =UKismetSystemLibrary::LineTraceSingleByProfile(GetWorld(), Start, NoNoiseEnd + Noise, FName("None"), false,Ignore, EDrawDebugTrace::None, OutHit, true);
@@ -131,6 +146,8 @@ float ABaseCharacters::TakeDamage(float DamageAmount, FDamageEvent const& Damage
 void ABaseCharacters::ConfirmedExecution()
 {
 	if (ActionToExexcute) {
+		if (CurrentEnergy <= 0) return;
+		CurrentEnergy--; // Spells are  1 + there cost
 		(this->*ActionToExexcute)();
 		ActionToExexcute = nullptr;
 	}
@@ -161,8 +178,6 @@ void ABaseCharacters::PewPewExecution()
 	ChanceToHit();
 	if(Cast<ABaseCharacters>(Target)->bIsAlly != bIsAlly )
 	ShootComponenttest->UseAbility();
-
-	//Retirer point d action or we 
 
 	//Set Target To None
 	if(!Cast<ABaseCharacters>(Target)->IsAlive())

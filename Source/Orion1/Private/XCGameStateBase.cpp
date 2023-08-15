@@ -17,7 +17,8 @@ void AXCGameStateBase::BeginPlay()
 
 TArray<ABaseCharacters*> AXCGameStateBase::FillCharArray()
 {
-	TurnNumber++;
+	//TurnNumber++;
+	NbTurn++;
 
 	TArray<ABaseCharacters*> ResultArray = TArray< ABaseCharacters*>();
 
@@ -101,7 +102,7 @@ void AXCGameStateBase::UnitEndTurn()
 	OnTurnEnd.Broadcast();
 
 	if (!AnyEnnemmiesAlive()) {
-		GameOverFunctionWin();
+		GameOverFunctionWin(); //&& plus de spawner TODO
 		return;
 	}
 
@@ -130,14 +131,8 @@ bool AXCGameStateBase::HandleUnitPossess(ABaseCharacters* C)
 		UBlackboardComponent* BBComp = Cast<AAIController>(C->GetController())->GetBlackboardComponent();
 		if (BBComp) {
 			BBComp->SetValueAsBool(FName("AIsTurn"), true);
-		}
-		else {
-
-			GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Red, TEXT("AI Turn")); //Temporary while AI doesn't exist
 			OnUnitTurnStart.Broadcast(C);
-			NextChar();
-		}
-		
+		}		
 		return true;
 	}
 }

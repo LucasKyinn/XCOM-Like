@@ -105,10 +105,11 @@ public:
 	FOnTargetChanged TargetChanged;
 
 
-
+	UFUNCTION(BlueprintCallable)
 	void SetTarget(AActor* NewTarget);
 
 	AActor* GetTarget() { return Target; };
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -137,6 +138,8 @@ public:
 	void ConfirmedExecution();
 	void CanceledExecution();
 	void MoveToVectorLocation();
+
+	UFUNCTION(BlueprintCallable)
 	void PewPewExecution();
 	void NextTarget();
 	void PreviousTarget();

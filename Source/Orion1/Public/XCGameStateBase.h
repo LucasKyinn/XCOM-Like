@@ -51,7 +51,7 @@ public:
 
 	void GameOverFunctionWin();
 
-
+	UFUNCTION(BlueprintCallable)
 	void UnitEndTurn();
 
 	bool HandleUnitPossess(class ABaseCharacters* C);

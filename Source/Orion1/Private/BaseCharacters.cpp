@@ -176,6 +176,8 @@ void ABaseCharacters::MoveToVectorLocation()
 void ABaseCharacters::PewPewExecution()
 {
 	ChanceToHit();
+	if(bIsAlly)
+
 	if(Cast<ABaseCharacters>(Target)->bIsAlly != bIsAlly )
 	ShootComponenttest->UseAbility();
 
@@ -183,11 +185,14 @@ void ABaseCharacters::PewPewExecution()
 	if(!Cast<ABaseCharacters>(Target)->IsAlive())
 	SetTarget(nullptr);
 
-	//Set Shoot mode off
-	AController* PlayerController = GetController();
-	AXCOM_Player_Controller* XPlayerController = Cast<AXCOM_Player_Controller>(PlayerController);
-	if (XPlayerController) 
-		XPlayerController->SetShootMode(false);
+	if (bIsAlly)
+	{
+		//Set Shoot mode off
+		AController* PlayerController = GetController();
+		AXCOM_Player_Controller* XPlayerController = Cast<AXCOM_Player_Controller>(PlayerController);
+		if (XPlayerController)
+			XPlayerController->SetShootMode(false);
+	}
 }
 
 void ABaseCharacters::NextTarget()

@@ -6,6 +6,7 @@
 #include "Engine/DataAsset.h"
 #include "GameplayTagContainer.h"
 #include "SpellDataAsset.h"
+#include "Engine/Texture2D.h"
 #include "CharactersDataAsset.generated.h"
 
 /**
@@ -41,4 +42,8 @@ public:
 
 	UPROPERTY(BlueprintReadWrite, Category = "Skills")
 	USpellDataAsset* ShootDataAsset; 
+
+	UPROPERTY(BlueprintReadWrite, Category = "Image")
+	UTexture2D* UnitIcone;
+
 };

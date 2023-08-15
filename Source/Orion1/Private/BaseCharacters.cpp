@@ -13,6 +13,8 @@
 #include "HealthComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Blueprint/AIBlueprintHelperLibrary.h"
+#include "XCGameStateBase.h"
+
 
 //FName ABaseCharacters::ShootComponentClassName(TEXT("BP_AbilityShoot"));
 
@@ -29,12 +31,31 @@ ABaseCharacters::ABaseCharacters()
 
 }
 
+void ABaseCharacters::SetTarget(AActor* NewTarget)
+{
+	Target = NewTarget;
+	TargetChanged.Broadcast(Target);
+}
+
 // Called when the game starts or when spawned
 void ABaseCharacters::BeginPlay()
 {
 	Super::BeginPlay();
 	HealthComponent = FindComponentByClass<UHealthComponent>();
 
+	AXCGameStateBase* GameState = GetWorld()->GetGameState<AXCGameStateBase>();
+	if (GameState) {
+		GameState->OnUnitTurnStart.AddDynamic(this, &ABaseCharacters::TurnStart);
+	}
+
+}
+
+void ABaseCharacters::TurnStart(ABaseCharacters* CharPlaying)
+{
+	if (CharPlaying == this) {
+		CurrentEnergy += RegendEnergy;
+		if ( CurrentEnergy > MaxEnergy ) CurrentEnergy = MaxEnergy ;
+	}
 }
 
 // Called every frame
@@ -89,7 +110,7 @@ int ABaseCharacters::ChanceToHit()
 
 	for (int i = 0; i < 100; i++) {
 
-		//FMAth::RandCon a la place
+		//FMAth::RandCon a la place .
 		Noise = UKismetMathLibrary::RandomUnitVector() * FMath::Clamp((Direction.Length() - Precision), 50, Precision); //Vraiment Claqué au sol :Smiley Face :
 
 		bool Hit =UKismetSystemLibrary::LineTraceSingleByProfile(GetWorld(), Start, NoNoiseEnd + Noise, FName("None"), false,Ignore, EDrawDebugTrace::None, OutHit, true);
@@ -125,6 +146,8 @@ float ABaseCharacters::TakeDamage(float DamageAmount, FDamageEvent const& Damage
 void ABaseCharacters::ConfirmedExecution()
 {
 	if (ActionToExexcute) {
+		if (CurrentEnergy <= 0) return;
+		CurrentEnergy--; // Spells are  1 + there cost
 		(this->*ActionToExexcute)();
 		ActionToExexcute = nullptr;
 	}
@@ -132,16 +155,19 @@ void ABaseCharacters::ConfirmedExecution()
 
 void ABaseCharacters::CanceledExecution()
 {
+	if (MovementGhost) 
+	{
+		MovementGhost->Destroy();
+		MovementGhost = nullptr;
+	}
 	ActionToExexcute = nullptr;
 }
 
 void ABaseCharacters::MoveToVectorLocation()
 {
-
-	//Set Walk mode off
 	AController* PlayerController = GetController();
 	AXCOM_Player_Controller* XPlayerController = Cast<AXCOM_Player_Controller>(PlayerController);
-	if (XPlayerController) XPlayerController->bWalkMode = false;
+	if (XPlayerController) XPlayerController->SetWalkMode(false);
 
 	UAIBlueprintHelperLibrary::SimpleMoveToLocation(Controller,VectDestination);
 
@@ -150,42 +176,39 @@ void ABaseCharacters::MoveToVectorLocation()
 void ABaseCharacters::PewPewExecution()
 {
 	ChanceToHit();
+	if(bIsAlly)
+
 	if(Cast<ABaseCharacters>(Target)->bIsAlly != bIsAlly )
 	ShootComponenttest->UseAbility();
 
-	else {
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Cant Shoot All"));
-	}
-	//Retirer point d action or we 
-
 	//Set Target To None
-	Target = nullptr;
+	if(!Cast<ABaseCharacters>(Target)->IsAlive())
+	SetTarget(nullptr);
 
-	//Set Shoot mode off
-	AController* PlayerController = GetController();
-	AXCOM_Player_Controller* XPlayerController = Cast<AXCOM_Player_Controller>(PlayerController);
-	if (XPlayerController) XPlayerController->bShootMode = false;
+	if (bIsAlly)
+	{
+		//Set Shoot mode off
+		AController* PlayerController = GetController();
+		AXCOM_Player_Controller* XPlayerController = Cast<AXCOM_Player_Controller>(PlayerController);
+		if (XPlayerController)
+			XPlayerController->SetShootMode(false);
+	}
 }
 
 void ABaseCharacters::NextTarget()
 {
 	if (ActorInRange.Num() == 0) return;
 	int place = ActorInRange.Find(Target);
-	if (place == ActorInRange.Num()-1) Target = ActorInRange[0]; //Fin de l'array -1 ????? 
-	else Target = ActorInRange[(place+1)];
-	GEngine->AddOnScreenDebugMessage(-1, 10, FColor::Green, Target->GetActorLabel());
-
-	//Focus sur Target ? probablment plus facile en BP
+	if (place == ActorInRange.Num()-1) SetTarget(ActorInRange[0]);
+	else SetTarget(ActorInRange[(place + 1)]) ;
 }
 
 void ABaseCharacters::PreviousTarget()
 {
 	if (ActorInRange.Num() == 0) return;
 	int place = ActorInRange.Find(Target);
-	if (place == 0) Target = ActorInRange[(ActorInRange.Num()-1)]; 
-	else Target = ActorInRange[(place-1)];
-	GEngine->AddOnScreenDebugMessage(-1, 10, FColor::Green, Target->GetActorLabel());
-
+	if (place == 0) SetTarget(ActorInRange[(ActorInRange.Num() - 1)]);
+	else SetTarget(ActorInRange[(place - 1)]);
 }
 
 bool ABaseCharacters::IsAlive()

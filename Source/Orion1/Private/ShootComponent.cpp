@@ -20,7 +20,7 @@ void UShootComponent::UseAbility()
 	FVector Start = Owner->GetActorLocation();
 	FVector NoNoiseEnd, Direction, Noise;
 	FHitResult OutHit;
-	Direction = Cast<ABaseCharacters>(Owner)->Target->GetActorLocation() - Start;
+	Direction = Cast<ABaseCharacters>(Owner)->GetTarget()->GetActorLocation() - Start;
 	NoNoiseEnd = Direction.GetSafeNormal() * Direction.Length() * 2 + Start;
 	TArray<AActor*> Ignore;
 	Ignore.Add(Owner);

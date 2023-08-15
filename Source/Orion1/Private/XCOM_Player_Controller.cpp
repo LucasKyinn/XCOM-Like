@@ -8,6 +8,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
+#include "XCGameStateBase.h"
 
 
 AXCOM_Player_Controller::AXCOM_Player_Controller()
@@ -35,7 +36,7 @@ void AXCOM_Player_Controller::BeginPlay()
 		for (AActor* Actor : OutActors) {
 			AllyArray.Add(Cast<ACharacter>(Actor));
 		}
-		Possess(AllyArray[0]);
+		//Possess(AllyArray[0]);
 	}
 }
 
@@ -65,6 +66,7 @@ void AXCOM_Player_Controller::SetupInputComponent()
 		EnhancedInputComponent->BindAction(Shoot, ETriggerEvent::Completed, this, &AXCOM_Player_Controller::ShootMode);
 		EnhancedInputComponent->BindAction(Next, ETriggerEvent::Completed, this, &AXCOM_Player_Controller::GoNext);
 		EnhancedInputComponent->BindAction(Previous, ETriggerEvent::Completed, this, &AXCOM_Player_Controller::GoPrevious);
+		EnhancedInputComponent->BindAction(EndTurn, ETriggerEvent::Completed, this, &AXCOM_Player_Controller::EndCharTurn);
 
 
 	}
@@ -212,5 +214,17 @@ void AXCOM_Player_Controller::GoPrevious()
 		ABaseCharacters* ControledPawn = Cast<ABaseCharacters>(GetPawn());
 		ControledPawn->PreviousTarget();
 	}
+}
+
+void AXCOM_Player_Controller::EndCharTurn()
+{	
+	AGameModeBase* GameMode = GetWorld()->GetAuthGameMode<AGameModeBase>();
+
+	AXCGameStateBase* GameState = Cast<AXCGameStateBase>(GameMode->GameState);
+
+	if (GameState) {
+		GameState->UnitEndTurn();
+	}
+
 }
 

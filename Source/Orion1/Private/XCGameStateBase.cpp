@@ -11,13 +11,14 @@
 void AXCGameStateBase::BeginPlay()
 {
 	Super::BeginPlay();
+	CurrentGamePhase = EGamePhase::InProgress;
 	CharArray = FillCharArray();
-	SetupTurn();
-
 }
 
 TArray<ABaseCharacters*> AXCGameStateBase::FillCharArray()
 {
+	TurnNumber++;
+
 	TArray<ABaseCharacters*> ResultArray = TArray< ABaseCharacters*>();
 
 	TArray<AActor*> FoundActors;
@@ -28,18 +29,28 @@ TArray<ABaseCharacters*> AXCGameStateBase::FillCharArray()
 	}
 	ResultArray.Sort([](const ABaseCharacters& A, const ABaseCharacters& B) { return A.Speed < B.Speed; });
 
-	if (ResultArray.Num() <= 0)  GameOverFunction();
+	if (ResultArray.Num() <= 0)  GameOverFunctionLose();
 	return ResultArray;
 }
 
-bool AXCGameStateBase::EndOfTurn()
+bool AXCGameStateBase::AnyAllyAlive()
 {
 	bAnyAllyAlive = false;
 	for (ABaseCharacters* C : CharArray) {
-		if (C->IsAlive()) C->WalkedDistance = C->MaxWalkableDistance; //TODO Reset Ablity to shoot
-		if (bAnyAllyAlive == false && C->IsAlive() && C->bIsAlly) bAnyAllyAlive = true;
+		if (C) {
+			if (C->IsAlive()) C->WalkedDistance = C->MaxWalkableDistance; //TODO Reset Ablity to shoot
+			if (bAnyAllyAlive == false && C->IsAlive() && C->bIsAlly) bAnyAllyAlive = true;
+		}
 	}
 	return bAnyAllyAlive;
+}
+
+bool AXCGameStateBase::AnyEnnemmiesAlive()
+{
+	for (ABaseCharacters* C : CharArray) {
+		if (C && C->IsAlive() && !(C->bIsAlly)) return true;
+	}
+	return false;
 }
 
 void AXCGameStateBase::SetupTurn()
@@ -55,12 +66,13 @@ void AXCGameStateBase::NextChar()
 {
 	IndexPlayingUnit++;
 	if (IndexPlayingUnit >= CharArray.Num()) { //Enveryone played
-		if (EndOfTurn()) {
+		if (AnyAllyAlive()) {
 			CharArray = FillCharArray();
 			SetupTurn();
 		}
 		else {
-			GameOverFunction();
+			GameOverFunctionLose();
+			return;
 		}
 	}
 
@@ -70,10 +82,32 @@ void AXCGameStateBase::NextChar()
 
 
 
-void AXCGameStateBase::GameOverFunction()
+void AXCGameStateBase::GameOverFunctionLose()
 {
 	GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Red, TEXT("Game Is Done"));
-	UKismetSystemLibrary::QuitGame(GetWorld(), GetWorld()->GetFirstPlayerController(), EQuitPreference::Quit , false);
+	CurrentGamePhase = EGamePhase::GameLost;
+	//UKismetSystemLibrary::QuitGame(GetWorld(), GetWorld()->GetFirstPlayerController(), EQuitPreference::Quit , false);
+}
+
+void AXCGameStateBase::GameOverFunctionWin()
+{
+	GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Red, TEXT("Game Is Done"));
+	CurrentGamePhase = EGamePhase::GameWon;
+	//UKismetSystemLibrary::QuitGame(GetWorld(), GetWorld()->GetFirstPlayerController(), EQuitPreference::Quit, false);
+}
+
+void AXCGameStateBase::UnitEndTurn()
+{
+	OnTurnEnd.Broadcast();
+
+	if (!AnyEnnemmiesAlive()) {
+		GameOverFunctionWin();
+		return;
+	}
+
+	//Depossess ; TODO
+
+	NextChar();
 }
 
 bool AXCGameStateBase::HandleUnitPossess(ABaseCharacters* C)
@@ -83,15 +117,16 @@ bool AXCGameStateBase::HandleUnitPossess(ABaseCharacters* C)
 	if (C->bIsAlly) {
 		APlayerController* PlayerController = GetWorld()->GetFirstPlayerController(); //single player only one ;
 
-		if (PlayerController != nullptr)
+		if (PlayerController)
 		{
 			PlayerController->Possess(C);
+			OnUnitTurnStart.Broadcast(C);
 			return true;
 		}
 		else return false;
 	}
 	else {
-
+		//TEMP
 		UBlackboardComponent* BBComp = Cast<AAIController>(C->GetController())->GetBlackboardComponent();
 		if (BBComp) {
 			BBComp->SetValueAsBool(FName("AIsTurn"), true);
@@ -99,9 +134,19 @@ bool AXCGameStateBase::HandleUnitPossess(ABaseCharacters* C)
 		else {
 
 			GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Red, TEXT("AI Turn")); //Temporary while AI doesn't exist
+			OnUnitTurnStart.Broadcast(C);
 			NextChar();
 		}
 		
 		return true;
 	}
+}
+
+void AXCGameStateBase::HandleBeginPlay()
+{
+	Super::HandleBeginPlay();
+	if (!CharArray.IsEmpty())
+		SetupTurn();
+	else GameOverFunctionLose();
+
 }

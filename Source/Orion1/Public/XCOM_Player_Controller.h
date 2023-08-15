@@ -43,6 +43,10 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	class UInputAction* Previous;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	class UInputAction* EndTurn;
+	
 	// Other
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Characters")
 	TSubclassOf <ACharacter> AllyClass;
@@ -84,4 +88,6 @@ protected:
 	UFUNCTION(BlueprintCallable)
 	void GoPrevious();
 
+	UFUNCTION(BlueprintCallable)
+	void EndCharTurn();
 };

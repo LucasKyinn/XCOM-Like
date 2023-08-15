@@ -27,7 +27,7 @@ TArray<ABaseCharacters*> AXCGameStateBase::FillCharArray()
 		ABaseCharacters* Char = Cast<ABaseCharacters>(A);
 		if (Char && Char->IsAlive()) ResultArray.Push(Char); // TODO also check if aggro ;
 	}
-	ResultArray.Sort([](const ABaseCharacters& A, const ABaseCharacters& B) { return A.Speed < B.Speed; });
+	ResultArray.Sort([](const ABaseCharacters& A, const ABaseCharacters& B) { return A.Speed > B.Speed; });
 
 	if (ResultArray.Num() <= 0)  GameOverFunctionLose();
 	return ResultArray;

@@ -29,6 +29,12 @@ ABaseCharacters::ABaseCharacters()
 
 }
 
+void ABaseCharacters::SetTarget(AActor* NewTarget)
+{
+	Target = NewTarget;
+	TargetChanged.Broadcast(Target);
+}
+
 // Called when the game starts or when spawned
 void ABaseCharacters::BeginPlay()
 {
@@ -132,13 +138,16 @@ void ABaseCharacters::ConfirmedExecution()
 
 void ABaseCharacters::CanceledExecution()
 {
+	if (MovementGhost) 
+	{
+		MovementGhost->Destroy();
+		MovementGhost = nullptr;
+	}
 	ActionToExexcute = nullptr;
 }
 
 void ABaseCharacters::MoveToVectorLocation()
 {
-
-	//Set Walk mode off
 	AController* PlayerController = GetController();
 	AXCOM_Player_Controller* XPlayerController = Cast<AXCOM_Player_Controller>(PlayerController);
 	if (XPlayerController) XPlayerController->bWalkMode = false;
@@ -153,13 +162,11 @@ void ABaseCharacters::PewPewExecution()
 	if(Cast<ABaseCharacters>(Target)->bIsAlly != bIsAlly )
 	ShootComponenttest->UseAbility();
 
-	else {
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Cant Shoot All"));
-	}
 	//Retirer point d action or we 
 
 	//Set Target To None
-	Target = nullptr;
+	if(!Cast<ABaseCharacters>(Target)->IsAlive())
+	SetTarget(nullptr);
 
 	//Set Shoot mode off
 	AController* PlayerController = GetController();
@@ -171,21 +178,16 @@ void ABaseCharacters::NextTarget()
 {
 	if (ActorInRange.Num() == 0) return;
 	int place = ActorInRange.Find(Target);
-	if (place == ActorInRange.Num()-1) Target = ActorInRange[0]; //Fin de l'array -1 ????? 
-	else Target = ActorInRange[(place+1)];
-	GEngine->AddOnScreenDebugMessage(-1, 10, FColor::Green, Target->GetActorLabel());
-
-	//Focus sur Target ? probablment plus facile en BP
+	if (place == ActorInRange.Num()-1) SetTarget(ActorInRange[0]);
+	else SetTarget(ActorInRange[(place + 1)]) ;
 }
 
 void ABaseCharacters::PreviousTarget()
 {
 	if (ActorInRange.Num() == 0) return;
 	int place = ActorInRange.Find(Target);
-	if (place == 0) Target = ActorInRange[(ActorInRange.Num()-1)]; 
-	else Target = ActorInRange[(place-1)];
-	GEngine->AddOnScreenDebugMessage(-1, 10, FColor::Green, Target->GetActorLabel());
-
+	if (place == 0) SetTarget(ActorInRange[(ActorInRange.Num() - 1)]);
+	else SetTarget(ActorInRange[(place - 1)]);
 }
 
 bool ABaseCharacters::IsAlive()

@@ -86,8 +86,6 @@ void AXCOM_Player_Controller::OnSetDestinationTriggered()
 void AXCOM_Player_Controller::OnSetDestinationReleased()
 {
 	if (bWalkMode) {
-		GEngine->AddOnScreenDebugMessage(5, 10.f, FColor::Red, TEXT("bWalkMode"));
-
 		UWorld* World = GetWorld();
 		if (World != nullptr) {
 
@@ -106,10 +104,7 @@ void AXCOM_Player_Controller::OnSetDestinationReleased()
 
 				ControledPawn->VectDestination = Hit.Location;
 
-				// Create Ghost Walking to point ?
 				if (ControledPawn->GhostClass != nullptr) {
-					GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Red, TEXT("ControledPawn->GhostClass != nullptr"));
-
 					UWorld* Worl = GetWorld();
 					FTransform GhostSpawnTransform;
 					FVector LocationWithZ = Hit.Location;
@@ -148,7 +143,6 @@ void AXCOM_Player_Controller::OnSetDestinationReleased()
 
 void AXCOM_Player_Controller::CancelAction()
 {
-	GEngine->AddOnScreenDebugMessage(5, 10.f, FColor::Red, TEXT("CancelAction"));
 	ABaseCharacters* ControledPawn = Cast<ABaseCharacters>(GetPawn());
 	ControledPawn->CanceledExecution();
 	bWalkMode = false;
@@ -157,14 +151,12 @@ void AXCOM_Player_Controller::CancelAction()
 
 void AXCOM_Player_Controller::ConfirmAction()
 {
-	GEngine->AddOnScreenDebugMessage(5, 10.f, FColor::Red, TEXT("ConfirmAction"));
 	ABaseCharacters* ControledPawn = Cast<ABaseCharacters>(GetPawn());
 	ControledPawn->ConfirmedExecution();
 }
 
 void AXCOM_Player_Controller::WalkMode()
 {
-	GEngine->AddOnScreenDebugMessage(5, 10.f, FColor::Red, TEXT("WalkMode"));
 	if (bShootMode)return;
 
 	bWalkMode = true;
@@ -175,7 +167,6 @@ void AXCOM_Player_Controller::WalkMode()
 
 void AXCOM_Player_Controller::ShootMode()
 {
-	GEngine->AddOnScreenDebugMessage(5, 10.f, FColor::Red, TEXT("ShootMode"));
 	if (bWalkMode)return;
 	UWorld* World = GetWorld();
 	ABaseCharacters* ControledPawn = Cast<ABaseCharacters>(GetPawn());
@@ -186,14 +177,20 @@ void AXCOM_Player_Controller::ShootMode()
 		TArray< AActor* >ActorToIgnore = TArray< AActor* >();
 		ActorToIgnore.Add(Cast<AActor>(ControledPawn));
 		UKismetSystemLibrary::SphereOverlapActors(World, ControledPawn->GetActorLocation(), ControledPawn->Range, TArray< TEnumAsByte< EObjectTypeQuery > >(), ABaseCharacters::StaticClass(), ActorToIgnore, ActorInRange);
-		if (ActorInRange.Num() > 0) {
-			ControledPawn->ActorInRange = ActorInRange;
-			ControledPawn->Target = ActorInRange[0]; 
-			ControledPawn->ActionToExexcute = &ABaseCharacters::PewPewExecution;
+		if (EnnClass && ActorInRange.Num() > 0) {
+			for (AActor* Actor : ActorInRange) {
+				if (!Actor->IsA(EnnClass)) {
+					ActorInRange.Remove(Actor);
+				}
+			}
+			if (ActorInRange.Num() > 0) { //Gross
+				ControledPawn->ActorInRange = ActorInRange;
+				ControledPawn->SetTarget(ActorInRange[0]);
+				ControledPawn->ActionToExexcute = &ABaseCharacters::PewPewExecution;
+			}
 		}
 		else {
 			bShootMode = false;
-			// Manque un truc ?
 		}
 		
 	}
@@ -218,6 +215,8 @@ void AXCOM_Player_Controller::GoPrevious()
 
 void AXCOM_Player_Controller::EndCharTurn()
 {	
+	if (bShootMode || bWalkMode) return;
+
 	AGameModeBase* GameMode = GetWorld()->GetAuthGameMode<AGameModeBase>();
 
 	AXCGameStateBase* GameState = Cast<AXCGameStateBase>(GameMode->GameState);

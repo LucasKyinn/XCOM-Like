@@ -6,6 +6,7 @@
 #include "GameFramework/PlayerController.h"
 #include "XCOM_Player_Controller.generated.h"
 
+
 /**
  * 
  */
@@ -51,14 +52,21 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Characters")
 	TSubclassOf <ACharacter> AllyClass;
 
+	// Other
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Characters")
+	TSubclassOf <ACharacter> EnnClass;
+
 	UPROPERTY(BlueprintReadOnly, Category = "Characters", meta = (AllowPrivateAccess = "true"))
 	TArray<ACharacter*> AllyArray; 
 
 	bool bWalkMode = false;
 	bool bShootMode = false;
 
-
 protected: 
+
+	UPROPERTY(BlueprintReadOnly)
+	ACharacter* CurrControlled;
+
 
 	//Basic Functions
 	virtual void BeginPlay() override;

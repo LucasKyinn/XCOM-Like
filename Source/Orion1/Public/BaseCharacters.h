@@ -8,6 +8,9 @@
 
 class UHealthComponent;
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnTargetChanged, AActor*, Target);
+
+
 //Base class for all characters in the game, allies and ennemies
 UCLASS()
 class ORION1_API ABaseCharacters : public ACharacter
@@ -80,8 +83,7 @@ public:
 
 	TArray<AActor*> ActorInRange;
 
-	UPROPERTY(BlueprintReadOnly, Category = "Target")
-	AActor* Target;
+
 
 	FVector WhereToShoot;
 
@@ -100,12 +102,21 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	class UHealthComponent* HealthComponent;
 
+	UPROPERTY(BlueprintAssignable, Category = "Events")
+	FOnTargetChanged TargetChanged;
+
+	void SetTarget(AActor* NewTarget);
+
+	AActor* GetTarget() { return Target; };
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly , Category = "Stats")
 	class UDataAssetForCharacters* UnitDataAsset;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Target")
+	AActor* Target;
 
 public:	
 	// Called every frame

@@ -4,7 +4,12 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameStateBase.h"
+#include "BaseCharacters.h"
 #include "XCGameStateBase.generated.h"
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnUnitTurnStart, ABaseCharacters*, CharPlaying);
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnTurnEnd);
 
 UENUM()
 enum class EGamePhase : uint8
@@ -20,22 +25,44 @@ class ORION1_API AXCGameStateBase : public AGameStateBase
 	GENERATED_BODY()
 
 private:
-	int NbTurn = 0 ;
-	TArray<class ABaseCharacters*> CharArray;
 	class ABaseCharacters* PlayingUnit;
-	int IndexPlayingUnit=0;
 
 public:
+
+	UPROPERTY(BlueprintReadOnly)
+	int IndexPlayingUnit = 0;
+
+	UPROPERTY(BlueprintReadWrite)
+	TArray<class ABaseCharacters*> CharArray;
+
+	UPROPERTY(BlueprintReadWrite)
+	int NbTurn = 0;
+
 	bool bAnyAllyAlive = true ;
 	TArray<class ABaseCharacters*> FillCharArray();
 
-	bool EndOfTurn();
+	bool AnyAllyAlive();
+
+	bool AnyEnnemmiesAlive();
 
 	void SetupTurn();
 
-	void GameOverFunction();
+	void GameOverFunctionLose();
+
+	void GameOverFunctionWin();
+
+	UFUNCTION(BlueprintCallable)
+	void UnitEndTurn();
 
 	bool HandleUnitPossess(class ABaseCharacters* C);
+
+	virtual void HandleBeginPlay();
+
+	UPROPERTY(BlueprintAssignable, Category = "Events")
+	FOnTurnEnd OnTurnEnd;
+
+	UPROPERTY(BlueprintAssignable, Category = "Events")
+	FOnUnitTurnStart OnUnitTurnStart;
 
 	UFUNCTION(BlueprintCallable)
 	void NextChar();
@@ -49,6 +76,8 @@ public:
 
 	UPROPERTY(BlueprintReadWrite, Category = "Turn Based")
 	EGamePhase CurrentGamePhase; //TODO Use it 
+
+	int TurnNumber=0;
 
 protected:
 	// Called when the game starts or when spawned

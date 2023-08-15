@@ -36,7 +36,7 @@ void AXCOM_Player_Controller::BeginPlay()
 		for (AActor* Actor : OutActors) {
 			AllyArray.Add(Cast<ACharacter>(Actor));
 		}
-		//Possess(AllyArray[0]);
+		Possess(AllyArray[0]);
 	}
 }
 
